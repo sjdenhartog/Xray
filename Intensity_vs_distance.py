@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from pathlib import Path
 from scipy.optimize import curve_fit, minimize
+import pandas as pd
 
 
 def cate_to_astra(path, det, geom_scaling_factor=None, angles=None):
@@ -222,12 +223,24 @@ print(ratio_column_water.mean())
 intensity_scatter_empty = image_array_scatter_empty[row_start:row_end,col_start:col_end].mean(axis=0).flatten()
 intensity_scatter_full = image_array_scatter_full[row_start:row_end,col_start:col_end].mean(axis=0).flatten()
 
-#I_empty = image_array_empty[row_start:row_end,col_start:col_end].flatten() - image_array_scatter_empty[row_start:row_end,col_start:col_end].flatten() # correct for scatter
+####I_empty = image_array_empty[row_start:row_end,col_start:col_end].flatten() - image_array_scatter_empty[row_start:row_end,col_start:col_end].flatten() # correct for scatter
 I_empty = image_array_empty[row_start:row_end,col_start:col_end].mean(axis=0).flatten() - intensity_scatter_empty # correct for scatter 
+#I_empty = image_array_empty[row_start:row_end,col_start:col_end].flatten() - intensity_scatter_empty # correct for scatter $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 I_full = image_array[row_start:row_end,col_start:col_end].mean(axis=0).flatten() - intensity_scatter_full
+#I_full = image_array[row_start:row_end,col_start:col_end].flatten() - intensity_scatter_full
 
 #lnII = -np.log((image_array[row_start:row_end,col_start:col_end].flatten()- image_array_scatter_full[row_start:row_end,col_start:col_end].flatten())/I_empty) # I0 is I_empty
 ln_intensity = -np.log(I_full/I_empty) # I0 is I_empty
+
+result = pd.DataFrame()
+result['distance_liquid'] = mean_distance
+result['distance_column'] = distance_through_column
+result['ratio'] = ratio_column_water
+result['-ln_intensity'] = ln_intensity
+result['I_empty'] = I_empty
+result['I_full'] = I_full
+result.to_csv('intensity.csv')
+
 fig, ax = plt.subplots(1,2, figsize=(15,5))
 ax[0].plot(mean_distance, ln_intensity, '--o', alpha=0.5)#, alpha=0.5, s=5)
 ax[0].set_xlabel('x (cm)', fontsize=15)
