@@ -31,6 +31,9 @@ path_empty = Path(r'D:\XRay\2024-11-19 Rik en Sam\preprocessed_empty\camera 1') 
 path_scatter_empty = Path(r'D:\XRay\2024-11-19 Rik en Sam\preprocessed_empty_scatter_S23_D1\camera 1') # scatter of empty column
 path_scatter_full = Path(r'D:\XRay\2024-11-19 Rik en Sam\preprocessed_water_0lmin_scatter_S23_D1\camera 1') # scatter of full column
 
+path_empty2 =  Path(r'd:\XRay\2024-11-28 Rik en Sam\scattercorrected_empty\camera 1')
+path2 = Path(r'd:\XRay\2024-11-28 Rik en Sam\preprocessed_AA_000gl_0lmin\camera 1')
+
 image_array_empty = average_intensity(path_empty, all_numbers) # Intensity of empty column (without attenuation caused by the liquid in the column)
 image_array_scatter_empty = average_intensity(path_scatter_empty, all_numbers)# intensit of scatter of empty column
 
@@ -39,13 +42,14 @@ I_empty = image_array_empty - image_array_scatter_empty
 data = pd.read_csv('intensity.csv')
 
 I_full = data['I_full']
+I_full2 = average_intensity(path2, all_numbers)
 #I_empty = data['I_empty']
 lnII = data['-ln_intensity']
 x = data['distance_liquid']
 
-coefficients = np.polyfit(x, lnII, 6)
-
-mu_eff = np.sum(x * lnII) / np.sum(x**2)
+coefficients = np.polyfit(x, lnII, 7)
+x_half = x[x<19/2]
+mu_eff = np.sum(x_half * lnII) / np.sum(x_half**2)
 
 #a, b, c, d = coefficients
 
@@ -53,9 +57,16 @@ x_fit = np.linspace(min(x), max(x), 500)
 y_fit = np.polyval(coefficients, x_fit)
 
 
-# plt.scatter(x, lnII)
-# plt.plot(x_fit, y_fit, c='k')
-# plt.show()
+
+
+plt.scatter(x, lnII)
+plt.plot(x_fit, y_fit, c='k', label='polyfit')
+plt.plot(x, mu_eff*x, c='r', label=r'$\mu_{eff}$'+f' = {mu_eff:.2f}')
+
+plt.xlabel('x (cm)')
+plt.ylabel(r'$-ln(I(x)/I_{empty})$')
+plt.legend()
+plt.show()
 
 def BHC(I_BH, I_empty, coefficients, mu_eff):
     x_values = np.linspace(0, 20, 1000) # range of possible distances through liquid (for interpolation)

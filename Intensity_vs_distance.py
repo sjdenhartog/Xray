@@ -149,6 +149,14 @@ def calc_distance_through_column(x_coords, y_coords, z_coords, srcX, srcY, srcZ,
 
     return d
 
+for cam in range(0,3):
+    
+    rows, cols = det['rows'], det['cols']
+    ( srcX, srcY, srcZ, dX, dY, dZ, uX, uY, uZ, vX, vY, vZ ) = geoms_all_cams[cam]
+    x_coords, y_coords, z_coords = compute_all_pixel_coordinates(dX, dY, dZ, uX, uY, uZ, vX, vY, vZ, rows, cols)
+    d = calc_distance_through_column(x_coords, y_coords, z_coords, srcX, srcY, srcZ, det, diameter_type='inner')
+
+    np.save(f'distances_cam{cam+1}.npy', d)
 ( srcX, srcY, srcZ, dX, dY, dZ, uX, uY, uZ, vX, vY, vZ ) = geoms_all_cams[0] # for camera 1?????? coordinates of source (src), coordinates of detector (d), 
                                                                              # the vector from detector pixel (0,0) to (0,1) (u),  the vector from detector pixel (0,0) to (1,0) (v)
 
@@ -159,6 +167,8 @@ rows, cols = det['rows'], det['cols']
 
 # Compute the 3D coordinates for all pixels
 x_coords, y_coords, z_coords = compute_all_pixel_coordinates(dX, dY, dZ, uX, uY, uZ, vX, vY, vZ, rows, cols)
+
+
 
 d = calc_distance_through_column(x_coords, y_coords, z_coords, srcX, srcY, srcZ, det) # distance through water (inner diameter) for all pixels
 d_outer = calc_distance_through_column(x_coords, y_coords, z_coords, srcX, srcY, srcZ, det, diameter_type='outer') # distance through water+column (outer diameter) for all pixels
